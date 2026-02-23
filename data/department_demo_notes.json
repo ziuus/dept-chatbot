@@ -1,0 +1,42 @@
+[
+  {
+    "id": "dept-001",
+    "title": "Department Office Timings",
+    "content": "The Computer Science department office is open from 09:00 to 17:00 on working days. Lunch break is 13:00 to 14:00."
+  },
+  {
+    "id": "dept-002",
+    "title": "Head of Department",
+    "content": "The Head of Department is Dr. Priya Nandan. The HOD office is in room C-102 and student consultation hours are 11:00 to 13:00."
+  },
+  {
+    "id": "dept-003",
+    "title": "Lab Availability",
+    "content": "Programming Lab 1 (L-101) is available for practice from 16:00 to 18:00 on weekdays. Network Lab (L-203) is open only with faculty supervision."
+  },
+  {
+    "id": "dept-004",
+    "title": "Placement Cell Contact",
+    "content": "For placement related queries, contact the placement coordinator at placement.cs@example.edu or visit room C-210."
+  },
+  {
+    "id": "dept-005",
+    "title": "Internship Support",
+    "content": "Students can get internship recommendation letters from their faculty mentor. Requests should be submitted at least 5 working days in advance."
+  },
+  {
+    "id": "dept-006",
+    "title": "Project Review Process",
+    "content": "Final year project reviews are conducted in three phases: proposal review, mid-term review, and final viva. Dates are announced by the department office."
+  },
+  {
+    "id": "dept-007",
+    "title": "Examination Cell",
+    "content": "Exam form corrections, hall ticket support, and grade-sheet clarification requests can be submitted at the examination help desk in room C-115."
+  },
+  {
+    "id": "dept-008",
+    "title": "General Student Guidance",
+    "content": "If information is unavailable with the assistant, students should contact the department office directly for official confirmation."
+  }
+]
