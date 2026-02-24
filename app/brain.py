@@ -29,9 +29,38 @@ class DepartmentBrain:
     )
     _UNKNOWN_MESSAGE = "I don't have that information right now."
     _ABUSIVE_MESSAGE = "Please use respectful language. I can help with department information."
+    _STOPWORDS = {
+        "a",
+        "an",
+        "and",
+        "are",
+        "as",
+        "at",
+        "be",
+        "by",
+        "for",
+        "from",
+        "in",
+        "is",
+        "it",
+        "of",
+        "on",
+        "or",
+        "that",
+        "the",
+        "to",
+        "with",
+        "what",
+        "who",
+        "where",
+        "when",
+        "which",
+        "whom",
+    }
 
     def __init__(self) -> None:
         self._faculty = self._load_faculty(settings.faculty_file)
+        self._department_notes = self._load_department_notes(settings.department_notes_file)
         self._rag_enabled = chromadb is not None and sys.version_info < (3, 14)
         self._collection = None
         if self._rag_enabled:
@@ -66,8 +95,18 @@ class DepartmentBrain:
             return json.load(f)
 
     @staticmethod
+    def _load_department_notes(path: str) -> list[dict[str, Any]]:
+        p = Path(path)
+        if not p.exists():
+            return []
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, list) else []
+
+    @staticmethod
     def _tokenize(text: str) -> set[str]:
-        return set(re.findall(r"[a-zA-Z0-9]+", text.lower()))
+        tokens = set(re.findall(r"[a-zA-Z0-9]+", text.lower()))
+        return {t for t in tokens if len(t) > 2 and t not in DepartmentBrain._STOPWORDS}
 
     def _build_domain_terms(self) -> set[str]:
         base = {
@@ -91,6 +130,9 @@ class DepartmentBrain:
             base.update(self._tokenize(item.get("name", "")))
             for subject in item.get("subjects", []):
                 base.update(self._tokenize(subject))
+        for note in self._department_notes:
+            base.update(self._tokenize(note.get("title", "")))
+            base.update(self._tokenize(note.get("content", "")))
         return base
 
     def _is_abusive(self, question: str) -> bool:
@@ -157,6 +199,41 @@ class DepartmentBrain:
                     return subject
         return None
 
+    @staticmethod
+    def _extract_branch(question: str) -> str | None:
+        q = question.lower()
+        branch_aliases = {
+            "cse": "CSE",
+            "computer science": "CSE",
+            "it": "IT",
+            "information technology": "IT",
+            "aiml": "AIML",
+            "ai ml": "AIML",
+            "ai&ml": "AIML",
+            "ai/ml": "AIML",
+            "artificial intelligence": "AIML",
+            "ds": "DS",
+            "data science": "DS",
+            "cyber": "CYBER",
+            "cyber security": "CYBER",
+            "cybersecurity": "CYBER",
+        }
+        for alias, canonical in branch_aliases.items():
+            if alias in q:
+                return canonical
+        return None
+
+    @staticmethod
+    def _extract_semester(question: str) -> int | None:
+        q = question.lower()
+        match = re.search(r"\b(?:sem|semester)\s*[-:]?\s*(\d)\b", q)
+        if match:
+            return int(match.group(1))
+        num_match = re.search(r"\b([1-8])(?:st|nd|rd|th)?\s*(?:sem|semester)\b", q)
+        if num_match:
+            return int(num_match.group(1))
+        return None
+
     def try_structured_lookup(self, question: str) -> tuple[str | None, list[dict[str, Any]]]:
         q = question.lower()
         faculty = self._best_faculty_match(question)
@@ -179,12 +256,109 @@ class DepartmentBrain:
         if subject and any(k in q for k in ["who", "teacher", "faculty", "teach"]):
             teachers = [x for x in self._faculty if subject in x.get("subjects", [])]
             if teachers:
-                names = ", ".join(t["name"] for t in teachers)
+                branch = self._extract_branch(question)
+                semester = self._extract_semester(question)
+
+                filtered = teachers
+                if branch:
+                    filtered = [t for t in filtered if branch in t.get("branches", [])]
+                if semester:
+                    filtered = [t for t in filtered if semester in t.get("semesters", [])]
+
+                if not filtered:
+                    teacher_details = "; ".join(
+                        f'{t["name"]} (branches: {", ".join(t.get("branches", []))}; '
+                        f'semesters: {", ".join(str(s) for s in t.get("semesters", []))})'
+                        for t in teachers
+                    )
+                    return (
+                        f"No exact match found for {subject}"
+                        f"{' in ' + branch if branch else ''}"
+                        f"{' semester ' + str(semester) if semester else ''}. "
+                        f"Available faculty for {subject}: {teacher_details}.",
+                        [
+                            {"id": t["id"], "text": json.dumps(t), "metadata": {"source": "structured"}}
+                            for t in teachers
+                        ],
+                    )
+
+                names = ", ".join(t["name"] for t in filtered)
+                detail_suffix = ""
+                if len(filtered) > 1:
+                    detail_suffix = " " + " ".join(
+                        f'{t["name"]} handles branches {", ".join(t.get("branches", []))} '
+                        f'for semesters {", ".join(str(s) for s in t.get("semesters", []))}.'
+                        for t in filtered
+                    )
+
                 serialized = [
                     {"id": t["id"], "text": json.dumps(t), "metadata": {"source": "structured"}}
-                    for t in teachers
+                    for t in filtered
                 ]
-                return (f"{subject} is taught by {names}.", serialized)
+                qualifier = []
+                if branch:
+                    qualifier.append(f"branch {branch}")
+                if semester:
+                    qualifier.append(f"semester {semester}")
+                qualifier_text = f" for {' and '.join(qualifier)}" if qualifier else ""
+                return (f"{subject} is taught by {names}{qualifier_text}.{detail_suffix}", serialized)
+
+        note_answer, note_sources = self._lookup_department_note(question)
+        if note_answer:
+            return note_answer, note_sources
+
+        return (None, [])
+
+    def _lookup_department_note(self, question: str) -> tuple[str | None, list[dict[str, Any]]]:
+        if not self._department_notes:
+            return (None, [])
+
+        q = question.lower().strip()
+
+        if any(k in q for k in ["head of department", "hod", "department head"]):
+            for note in self._department_notes:
+                if "head of department" in note.get("title", "").lower():
+                    return (
+                        note.get("content", self._UNKNOWN_MESSAGE),
+                        [
+                            {
+                                "id": note.get("id", "dept-note"),
+                                "text": note.get("content", ""),
+                                "metadata": {
+                                    "source": "structured_note",
+                                    "title": note.get("title", ""),
+                                },
+                            }
+                        ],
+                    )
+
+        best_score = 0.0
+        best_note: dict[str, Any] | None = None
+        for note in self._department_notes:
+            title = note.get("title", "")
+            content = note.get("content", "")
+            score = max(
+                fuzz.partial_ratio(title.lower(), q),
+                fuzz.partial_ratio(content.lower(), q),
+            )
+            if score > best_score:
+                best_score = score
+                best_note = note
+
+        if best_note and best_score >= 70:
+            return (
+                best_note.get("content", self._UNKNOWN_MESSAGE),
+                [
+                    {
+                        "id": best_note.get("id", "dept-note"),
+                        "text": best_note.get("content", ""),
+                        "metadata": {
+                            "source": "structured_note",
+                            "title": best_note.get("title", ""),
+                        },
+                    }
+                ],
+            )
 
         return (None, [])
 

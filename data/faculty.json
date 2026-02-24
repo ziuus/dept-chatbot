@@ -3,6 +3,7 @@
     "id": "fac-001",
     "name": "Dr. Asha Menon",
     "subjects": ["Programming in C", "Data Structures"],
+    "branches": ["CSE", "IT"],
     "semesters": [1, 2],
     "cabin": "A-201",
     "availability": "09:30-12:30"
@@ -11,6 +12,7 @@
     "id": "fac-002",
     "name": "Prof. Rahul Mehta",
     "subjects": ["Object Oriented Programming", "Java"],
+    "branches": ["CSE", "IT"],
     "semesters": [2, 3],
     "cabin": "A-203",
     "availability": "11:00-14:00"
@@ -19,6 +21,7 @@
     "id": "fac-003",
     "name": "Dr. Neha Sharma",
     "subjects": ["Database Systems", "SQL Lab"],
+    "branches": ["CSE", "AIML"],
     "semesters": [3, 4],
     "cabin": "A-205",
     "availability": "10:00-13:00"
@@ -27,6 +30,7 @@
     "id": "fac-004",
     "name": "Dr. Vikram Rao",
     "subjects": ["Operating Systems", "System Programming"],
+    "branches": ["CSE", "CYBER"],
     "semesters": [4, 5],
     "cabin": "A-207",
     "availability": "09:00-12:00"
@@ -35,6 +39,7 @@
     "id": "fac-005",
     "name": "Prof. Pooja Kulkarni",
     "subjects": ["Computer Networks", "Network Security"],
+    "branches": ["CSE", "CYBER"],
     "semesters": [4, 6],
     "cabin": "A-209",
     "availability": "12:00-15:00"
@@ -43,6 +48,7 @@
     "id": "fac-006",
     "name": "Dr. Arjun Iyer",
     "subjects": ["Artificial Intelligence", "Machine Learning"],
+    "branches": ["AIML", "CSE"],
     "semesters": [5, 6],
     "cabin": "B-301",
     "availability": "10:30-13:30"
@@ -51,6 +57,7 @@
     "id": "fac-007",
     "name": "Prof. Meera Nair",
     "subjects": ["Web Technologies", "Full Stack Development"],
+    "branches": ["CSE", "IT"],
     "semesters": [5, 6],
     "cabin": "B-303",
     "availability": "11:30-15:30"
@@ -59,6 +66,7 @@
     "id": "fac-008",
     "name": "Dr. Sandeep Verma",
     "subjects": ["Data Analytics", "Big Data"],
+    "branches": ["AIML", "DS"],
     "semesters": [6, 7],
     "cabin": "B-305",
     "availability": "09:30-12:30"
@@ -66,7 +74,8 @@
   {
     "id": "fac-009",
     "name": "Prof. Kavita Joshi",
-    "subjects": ["Software Engineering", "Project Management"],
+    "subjects": ["Software Engineering", "Project Management", "Database Systems"],
+    "branches": ["CSE", "IT"],
     "semesters": [6, 7],
     "cabin": "B-307",
     "availability": "13:00-16:00"
@@ -74,7 +83,8 @@
   {
     "id": "fac-010",
     "name": "Dr. Rohan Bhat",
-    "subjects": ["Cyber Security", "Ethical Hacking"],
+    "subjects": ["Cyber Security", "Ethical Hacking", "Computer Networks"],
+    "branches": ["CYBER", "CSE"],
     "semesters": [7, 8],
     "cabin": "B-309",
     "availability": "10:00-13:00"
@@ -83,6 +93,7 @@
     "id": "fac-011",
     "name": "Prof. Divya Kapoor",
     "subjects": ["Cloud Computing", "DevOps"],
+    "branches": ["CSE", "AIML"],
     "semesters": [7, 8],
     "cabin": "B-311",
     "availability": "12:00-15:00"
@@ -90,7 +101,8 @@
   {
     "id": "fac-012",
     "name": "Dr. Nitin Deshmukh",
-    "subjects": ["Data Mining", "Deep Learning"],
+    "subjects": ["Data Mining", "Deep Learning", "Machine Learning"],
+    "branches": ["AIML", "DS"],
     "semesters": [8],
     "cabin": "B-313",
     "availability": "09:30-11:30"

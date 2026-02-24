@@ -128,3 +128,24 @@ pytest -q
 docker build -t dept-ai-brain .
 docker run --rm -p 8000:8000 --env-file .env dept-ai-brain
 ```
+
+## 9) Voice Frontend (Next.js)
+
+A simple voice UI is available in `frontend/`.
+
+Run backend first (example port):
+
+```bash
+uvicorn app.main:app --reload --port 8001
+```
+
+Then run frontend:
+
+```bash
+cd frontend
+npm install
+cp .env.local.example .env.local
+npm run dev
+```
+
+Open `http://127.0.0.1:3000` and ask questions by voice.

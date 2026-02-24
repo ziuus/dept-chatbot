@@ -17,6 +17,9 @@ class Settings:
     chroma_path: str = os.getenv("CHROMA_PATH", "./storage/chroma")
     chroma_collection: str = os.getenv("CHROMA_COLLECTION", "department_knowledge")
     faculty_file: str = os.getenv("FACULTY_FILE", "./data/faculty.json")
+    department_notes_file: str = os.getenv(
+        "DEPARTMENT_NOTES_FILE", "./data/department_demo_notes.json"
+    )
     top_k: int = int(os.getenv("TOP_K", "4"))
     max_rag_distance: float = float(os.getenv("MAX_RAG_DISTANCE", "0.85"))
     allow_off_topic: bool = os.getenv("ALLOW_OFF_TOPIC", "false").lower() == "true"
